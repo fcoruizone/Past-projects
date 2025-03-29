@@ -10,7 +10,7 @@ ULTRASONIC_PIN = 18  # GPIO 18 pin for the ultrasonic sensor (Trig and Echo comb
 
 # Email configuration
 SENDER_EMAIL = "smirthomeg17@gmail.com"  # Sender's email
-APP_PASSWORD = "tjmk ahdn eske qtls"     # App-specific password
+APP_PASSWORD = "**** **** **** ****"     # App-specific password
 RECEIVER_EMAILS = [
     "francisco.ruizsandoval@student.kuleuven.be",
     "changlai.zhang@student.kuleuven.be"
