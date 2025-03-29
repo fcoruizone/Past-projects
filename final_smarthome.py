@@ -2,22 +2,18 @@ import RPi.GPIO as GPIO
 import time
 import yagmail
 
-# Moisture Sensor configuration
-MOISTURE_SENSOR_PIN = 5  # D5 pin for the moisture sensor
 
-# Ultrasonic Sensor configuration
-ULTRASONIC_PIN = 18  # GPIO 18 pin for the ultrasonic sensor (Trig and Echo combined)
+MOISTURE_SENSOR_PIN = 5  
+ULTRASONIC_PIN = 18  
 
-# Email configuration
-SENDER_EMAIL = "smirthomeg17@gmail.com"  # Sender's email
-APP_PASSWORD = "**** **** **** ****"     # App-specific password
+
+SENDER_EMAIL = "smirthomeg17@gmail.com" 
+APP_PASSWORD = "**** **** **** ****"     # Censored App-specific password 
 RECEIVER_EMAILS = [
     "francisco.ruizsandoval@student.kuleuven.be",
-    "changlai.zhang@student.kuleuven.be"
 ]
 
-# State variable
-last_thirsty_alert_sent = False  # Avoid sending duplicate "dog is thirsty" emails
+last_thirsty_alert_sent = False 
 
 
 def send_email(subject, content):
@@ -33,25 +29,25 @@ def send_email(subject, content):
 def measure_distance():
     """Measure the distance using the ultrasonic sensor."""
     GPIO.setup(ULTRASONIC_PIN, GPIO.OUT)
-    # Send Trig signal
+
     GPIO.output(ULTRASONIC_PIN, True)
-    time.sleep(0.00001)  # Send a 10-microsecond pulse
+    time.sleep(0.00001)  
     GPIO.output(ULTRASONIC_PIN, False)
 
-    # Switch to Echo mode
+
     GPIO.setup(ULTRASONIC_PIN, GPIO.IN)
     start_time = time.time()
     stop_time = time.time()
 
-    # Record the time of the Echo signal
+ 
     while GPIO.input(ULTRASONIC_PIN) == 0:
         start_time = time.time()
     while GPIO.input(ULTRASONIC_PIN) == 1:
         stop_time = time.time()
 
-    # Calculate distance
+
     elapsed_time = stop_time - start_time
-    distance = (elapsed_time * 34300) / 2  # Speed of sound is 343 m/s
+    distance = (elapsed_time * 34300) / 2 
     return distance
 
 
@@ -74,23 +70,21 @@ def monitor():
         GPIO.setup(MOISTURE_SENSOR_PIN, GPIO.IN)
 
         while True:
-            # Check moisture sensor status
+        
             moisture = read_moisture()
 
-            # Measure distance using the ultrasonic sensor
+           
             distance = measure_distance()
             print(f"Distance: {distance:.2f} cm")
 
-            # Send an email if the dog is near and the bowl is dry
-            if distance < 15 and moisture == 0:  # Dog near and water is dry
+            if distance < 15 and moisture == 0:  
                 if not last_thirsty_alert_sent:
                     print("Dog is near and water is dry!")
                     send_email("Thirsty Alert", "Your dog is thirsty.")
                     last_thirsty_alert_sent = True
             else:
-                last_thirsty_alert_sent = False  # Reset alert state if conditions are not met
-
-            time.sleep(10)  # Check every 10 seconds
+                last_thirsty_alert_sent = False 
+            time.sleep(10)  
 
     except KeyboardInterrupt:
         print("Program stopped by User")
