@@ -1,19 +1,20 @@
 import RPi.GPIO as GPIO
 import time
 import yagmail
+import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
 
 MOISTURE_SENSOR_PIN = 5  
 ULTRASONIC_PIN = 18  
 
+SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+APP_PASSWORD = os.getenv("APP_PASSWORD")
+RECEIVER_EMAILS = os.getenv("RECEIVER_EMAILS").split(",")
 
-SENDER_EMAIL = "smirthomeg17@gmail.com" 
-APP_PASSWORD = "**** **** **** ****"     # Censored App-specific password 
-RECEIVER_EMAILS = [
-    "francisco.ruizsandoval@student.kuleuven.be",
-]
-
-last_thirsty_alert_sent = False 
+last_thirsty_alert_sent = False
 
 
 def send_email(subject, content):
@@ -31,23 +32,20 @@ def measure_distance():
     GPIO.setup(ULTRASONIC_PIN, GPIO.OUT)
 
     GPIO.output(ULTRASONIC_PIN, True)
-    time.sleep(0.00001)  
+    time.sleep(0.00001)
     GPIO.output(ULTRASONIC_PIN, False)
-
 
     GPIO.setup(ULTRASONIC_PIN, GPIO.IN)
     start_time = time.time()
     stop_time = time.time()
 
- 
     while GPIO.input(ULTRASONIC_PIN) == 0:
         start_time = time.time()
     while GPIO.input(ULTRASONIC_PIN) == 1:
         stop_time = time.time()
 
-
     elapsed_time = stop_time - start_time
-    distance = (elapsed_time * 34300) / 2 
+    distance = (elapsed_time * 34300) / 2
     return distance
 
 
@@ -70,21 +68,19 @@ def monitor():
         GPIO.setup(MOISTURE_SENSOR_PIN, GPIO.IN)
 
         while True:
-        
             moisture = read_moisture()
-
-           
             distance = measure_distance()
             print(f"Distance: {distance:.2f} cm")
 
-            if distance < 15 and moisture == 0:  
+            if distance < 15 and moisture == 0:
                 if not last_thirsty_alert_sent:
                     print("Dog is near and water is dry!")
                     send_email("Thirsty Alert", "Your dog is thirsty.")
                     last_thirsty_alert_sent = True
             else:
-                last_thirsty_alert_sent = False 
-            time.sleep(10)  
+                last_thirsty_alert_sent = False
+
+            time.sleep(10)
 
     except KeyboardInterrupt:
         print("Program stopped by User")
